@@ -1,18 +1,19 @@
 package telraam;
 
 import io.dropwizard.Application;
+import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.jdbi3.bundles.JdbiExceptionsBundle;
+import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.jdbi.v3.core.Jdbi;
 import telraam.api.BatonResource;
-import telraam.api.HelloworldResource;
 import telraam.database.daos.BatonDAO;
 import telraam.database.models.Baton;
 import telraam.database.models.Id;
-import telraam.healthchecks.TemplateHealthCheck;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,12 @@ public class App extends Application<AppConfiguration> {
     public void initialize(Bootstrap<AppConfiguration> bootstrap) {
         // nothing to do yet
         bootstrap.addBundle(new JdbiExceptionsBundle());
+        bootstrap.addBundle(new MigrationsBundle<AppConfiguration>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(AppConfiguration configuration) {
+                return configuration.getDataSourceFactory();
+            }
+        });
     }
 
     @Override
@@ -55,16 +62,10 @@ public class App extends Application<AppConfiguration> {
         }
 
         // Add api resources
-        final HelloworldResource resource = new HelloworldResource(
-                configuration.getTemplate(),
-                configuration.getDefaultName()
-        );
-        environment.jersey().register(resource);
         environment.jersey().register(new BatonResource(database.onDemand(BatonDAO.class)));
 
         // Register healthcheck
         // environment.healthChecks().register("database", new DatabaseHealthCheck(database));
-        environment.healthChecks().register("template", new TemplateHealthCheck(configuration.getTemplate()));
         logger.warning("TEST LOG");
     }
 }

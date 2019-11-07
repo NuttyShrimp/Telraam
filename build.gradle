@@ -27,6 +27,7 @@ application {
     mainClassName = 'telraam.App'
 }
 
+// -----------------------
 task runDev {
 
     finalizedBy {
@@ -35,14 +36,48 @@ task runDev {
         run
     }
 }
-task runProd {
+task runDevMigrate {
+    finalizedBy {
+        run.args('db', 'migrate', "$rootProject.projectDir/src/main/resources/telraam/devConfig.yml")
+        run
+    }
+}
+task runDevDBStatus {
+    finalizedBy {
+        run.args('db', 'status', "$rootProject.projectDir/src/main/resources/telraam/devConfig.yml")
+        run
+    }
+}
+// -----------------------
 
+// -------------------------
+task runProd {
     finalizedBy {
         run.environment("CONFIG_KEY", "PRODUCTION")
         run.args('server', "$rootProject.projectDir/src/main/resources/telraam/prodConfig.yml")
         run
     }
 }
+task runProdMigrate {
+    finalizedBy {
+        run.args('db', 'migrate', "$rootProject.projectDir/src/main/resources/telraam/prodConfig.yml")
+        run
+    }
+}
+task runProdDBStatus {
+    finalizedBy {
+        run.args('db', 'status', "$rootProject.projectDir/src/main/resources/telraam/prodConfig.yml")
+        run
+    }
+}
+task runProdDBDump {
+    finalizedBy {
+        run.args('db', 'dump', "$rootProject.projectDir/src/main/resources/telraam/prodConfig.yml")
+        run
+    }
+}
+// -----------------------
+
 idea {
     module {
         inheritOutputDirs = true
@@ -56,6 +91,7 @@ dependencies {
             'io.dropwizard:dropwizard-hibernate:' + dropwizardVersion,
             'io.dropwizard:dropwizard-auth:' + dropwizardVersion,
             'io.dropwizard:dropwizard-jdbi3:' + dropwizardVersion,
+            'io.dropwizard:dropwizard-migrations:' + dropwizardVersion,
 
     )
     // Database
@@ -136,5 +172,6 @@ file("$rootProject.projectDir/src/main/resources/telraam/testConfig.properties")
 }
 task migrateTestingDatabase(type: FlywayMigrateTask) {
     url = testProps.getProperty("DB_URL")
+    url = "jdbc:h2:./target/test-database"
     baselineOnMigrate = true
 }

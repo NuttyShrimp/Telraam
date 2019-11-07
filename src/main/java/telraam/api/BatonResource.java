@@ -11,6 +11,12 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 
+
+/**
+ * Warning
+ *
+ * Resource classes are used by multiple threads concurrently. In general, we recommend that resources be stateless/immutable, but it’s important to keep the context in mind.
+ */
 @Path("/baton")
 @Produces(MediaType.APPLICATION_JSON)
 public class BatonResource {
@@ -65,7 +71,7 @@ public class BatonResource {
      * Update a specific baton with the specified information
      */
     @PUT @Path(ENTITY_PATH)
-    public Response updateBaton(@PathParam(ID_NAME) Optional<Integer> id) {
+    public Response updateBaton(@PathParam(ID_NAME) Optional<Integer> id, Baton newBaton) {
         if (id.isPresent()) {
             Optional<Baton> optionalBaton = batonDAO.findBatonById(id.get());
             if (optionalBaton.isPresent()) {
